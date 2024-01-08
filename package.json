@@ -1,0 +1,17 @@
+{
+  "name": "com.juri.wiechmann.state-machine",
+  "version": "1.0.0",
+  "displayName": "StateMachine",
+  "description": "Simple StateMachine",
+  "unity": "2019.4",
+  "author": {
+    "name": "Juri Wiechmann",
+    "email": "juriwiechmann@gmail.com"
+  },
+  "keywords": [ "state machine", "unity", "game development" ],
+  "repository": {
+    "type": "git",
+    "url": "TODO"
+  },
+  "category": "Gameplay"
+}

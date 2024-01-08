@@ -11,7 +11,14 @@
   "keywords": [ "state machine", "unity", "game development" ],
   "repository": {
     "type": "git",
-    "url": "TODO"
+    "url": "https://github.com/AncientCrimsonSnow/StateMachinePackage.git"
   },
-  "category": "Gameplay"
+  "category": "Gameplay",
+  "samples": [
+    {
+      "displayName": "Basic StateMachine Example",
+      "description": "A simple example demonstrating how the StateMachine is used.",
+      "path": "Samples~/StateMachineSample"
+    }
+  ]
 }

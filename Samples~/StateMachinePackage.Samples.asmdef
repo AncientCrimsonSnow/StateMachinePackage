@@ -1,0 +1,16 @@
+{
+    "name": "StateMachine.Examples",
+    "rootNamespace": "",
+    "references": [
+        "StateMachine.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

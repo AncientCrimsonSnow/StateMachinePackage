@@ -15,31 +15,13 @@ namespace StateMachinePackage.Runtime
         private readonly HashSet<State> _leafStates = new();
 
         private readonly UniqueQueue<State> _initQueue = new();
+        private readonly UniqueQueue<State> _exitQueue = new();
+        private readonly UniqueQueue<State> _enterQueue = new();
         private readonly Queue<TransitionData> _transitionQueue = new();
 
         public void Update()
         {
-            var newStates = _initQueue.Count > 0;
-            while (_initQueue.Count > 0)
-            {
-                State state = _initQueue.Dequeue();
-                state.Init();
-            }
-            if (newStates)
-            {
-                CurrentState.Enter();
-                while (!_leafStates.Contains(CurrentState))
-                {
-                    CurrentState = CurrentState.Children.First();
-                    CurrentState.Enter();
-                }
-            }
-            while(_transitionQueue.Count > 0)
-            {
-                TransitionData transitionData = _transitionQueue.Dequeue();
-                var state = GetStateByType(transitionData.from);
-                state.CreateTransitionInternal(transitionData.to, transitionData.condition);
-            }
+            ProcessQueues();
             CurrentState.Update();
         }
 
@@ -76,7 +58,31 @@ namespace StateMachinePackage.Runtime
                 _allStates.Add(state.GetType(), state);
             }
 
-            CurrentState ??= entryState;
+            var stack = new Stack<State>();
+            if(CurrentState == null)
+            {
+                var crrState = entryState;
+                while(crrState != null)
+                {
+                    stack.Push(crrState);
+                    crrState = crrState.Parent;
+                }
+                foreach (var state in stack)
+                    _enterQueue.Enqueue(state);
+                CurrentState = entryState;
+            }
+            else if(IsParentOf(entryState, CurrentState))
+            {
+                var crrState = entryState;
+                while (crrState != CurrentState)
+                {
+                    stack.Push(crrState);
+                    crrState = crrState.Parent;
+                }
+                foreach (var state in stack)
+                    _enterQueue.Enqueue(state);
+                CurrentState = entryState;
+            }
 
             return newStates;
         }
@@ -105,11 +111,11 @@ namespace StateMachinePackage.Runtime
 
             var (pathState1ToLCA, pathLCAtoState2) = FindPathsToLCA(CurrentState, state);
             foreach (var pathState in pathState1ToLCA)
-                pathState.Exit();
+                _exitQueue.Enqueue(pathState);
 
             CurrentState = state;
             foreach (var pathState in pathLCAtoState2)
-                pathState.Enter();
+                _enterQueue.Enqueue(pathState);
         }
 
         internal State GetStateByType(Type type)
@@ -117,6 +123,51 @@ namespace StateMachinePackage.Runtime
             if(_allStates.TryGetValue(type, out State value))
                 return value;
             return null;
+        }
+
+        private void ProcessQueues()
+        {
+            ProcessInitQueue();
+            ProcessTransitionQueue();
+            ProcessExitQueue();
+            ProcessEnterQueue();
+        }
+
+        private void ProcessInitQueue()
+        {
+            while (_initQueue.Count > 0)
+            {
+                State state = _initQueue.Dequeue();
+                state.Init();
+            }
+        }
+
+        private void ProcessTransitionQueue()
+        {
+            while (_transitionQueue.Count > 0)
+            {
+                TransitionData transitionData = _transitionQueue.Dequeue();
+                var state = GetStateByType(transitionData.from);
+                state.CreateTransitionInternal(transitionData.to, transitionData.condition);
+            }
+        }
+
+        private void ProcessExitQueue()
+        {
+            while (_exitQueue.Count > 0)
+            {
+                State state = _exitQueue.Dequeue();
+                state.Exit();
+            }
+        }
+
+        private void ProcessEnterQueue()
+        {
+            while (_enterQueue.Count > 0)
+            {
+                State state = _enterQueue.Dequeue();
+                state.Enter();
+            }
         }
 
         private int GetDepth(State state)
@@ -169,6 +220,23 @@ namespace StateMachinePackage.Runtime
             }
 
             return state1;
+        }
+
+        private bool IsParentOf(State child, State parent)
+        {
+            if (child == null || parent == null)
+                return false;
+
+            State current = child;
+            while (current.Parent != null)
+            {
+                if (current.Parent == parent)
+                    return true;
+
+                current = current.Parent;
+            }
+
+            return false;
         }
 
         private struct TransitionData

@@ -22,7 +22,13 @@ namespace StateMachinePackage.Runtime
         public void Update()
         {
             ProcessQueues();
-            CurrentState.Update();
+
+            var crrState = CurrentState;
+            while (crrState != null)
+            {
+                crrState.Update();
+                crrState = crrState.Parent;
+            }
         }
 
         public State[] GetLeafStates()

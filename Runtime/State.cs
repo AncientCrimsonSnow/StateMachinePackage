@@ -135,6 +135,17 @@ namespace StateMachinePackage.Runtime
             CreateTransition(to, condition);
         }
 
+        internal bool IsChildOf(State parent)
+        {
+            var crrParent = Parent;
+            while (parent != crrParent) {
+                if (crrParent.Parent == null)
+                    return false;
+                crrParent = crrParent.Parent;
+            }
+            return true;
+        }
+
         public void ClearTransitions()
         {
             foreach (var transition in Transitions)

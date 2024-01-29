@@ -24,9 +24,14 @@ namespace StateMachinePackage.Runtime.Transitions
         private void Execute()
         {
             var fromState = _stateMachineManager.GetStateByType(_from);
+            
             if (!_stateMachineManager.CurrentState.Equals(fromState))
-                return;
-
+            {
+                if(_stateMachineManager.CurrentState.IsChildOf(fromState))
+                    _stateMachineManager.SwitchState(_to);
+                else
+                    return;
+            }
             _stateMachineManager.SwitchState(_to);
         }
 

@@ -137,6 +137,8 @@ namespace StateMachinePackage.Runtime
 
         internal bool IsChildOf(State parent)
         {
+            if (Parent == null) 
+                return false;
             var crrParent = Parent;
             while (parent != crrParent) {
                 if (crrParent.Parent == null)

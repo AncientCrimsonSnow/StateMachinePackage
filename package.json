@@ -1,6 +1,6 @@
 {
   "name": "com.juri.wiechmann.state-machine",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "displayName": "StateMachine",
   "description": "Simple StateMachine",
   "unity": "2019.4",

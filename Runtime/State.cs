@@ -16,6 +16,7 @@ namespace StateMachinePackage.Runtime
 
         internal HashSet<State> Children = new HashSet<State>();
         internal HashSet<Transition> Transitions = new HashSet<Transition>();
+        internal State LastChild = null;
 
         public StateMachineManager StateMachineManager { get; internal set; }
 

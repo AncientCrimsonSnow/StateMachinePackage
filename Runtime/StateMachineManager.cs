@@ -113,8 +113,11 @@ namespace StateMachinePackage.Runtime
                 return;
             }
             while (!_leafStates.Contains(state))
-                state = state.Children.First();
-
+            {
+                state.LastChild ??= state.Children.First();
+                state = state.LastChild;
+            }
+                           
             var (pathState1ToLCA, pathLCAtoState2) = FindPathsToLCA(CurrentState, state);
             foreach (var pathState in pathState1ToLCA)
                 _exitQueue.Enqueue(pathState);
@@ -122,6 +125,13 @@ namespace StateMachinePackage.Runtime
             CurrentState = state;
             foreach (var pathState in pathLCAtoState2)
                 _enterQueue.Enqueue(pathState);
+
+
+            while (state.Parent != null)
+            {
+                state.Parent.LastChild = state;
+                state = state.Parent;
+            }
         }
 
         internal State GetStateByType(Type type)

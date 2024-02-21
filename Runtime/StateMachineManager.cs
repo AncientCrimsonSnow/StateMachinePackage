@@ -10,6 +10,8 @@ namespace StateMachinePackage.Runtime
     {
         public State CurrentState { private set; get; }
 
+        internal readonly UniqueQueue<Transition> TransitionExecuteQueue = new();
+
         private readonly Dictionary<Type, State> _allStates = new();
 
         private readonly HashSet<State> _leafStates = new();
@@ -17,7 +19,8 @@ namespace StateMachinePackage.Runtime
         private readonly UniqueQueue<State> _initQueue = new();
         private readonly UniqueQueue<State> _exitQueue = new();
         private readonly UniqueQueue<State> _enterQueue = new();
-        private readonly Queue<TransitionData> _transitionQueue = new();
+     
+        private readonly Queue<TransitionData> _transitionAddQueue = new();
 
         public void Update()
         {
@@ -95,7 +98,7 @@ namespace StateMachinePackage.Runtime
 
         public void AddTransition(Type from, Type to, Condition condition)
         {
-            _transitionQueue.Enqueue(
+            _transitionAddQueue.Enqueue(
                 new TransitionData
                 {
                     from = from,
@@ -143,7 +146,8 @@ namespace StateMachinePackage.Runtime
         private void ProcessQueues()
         {
             ProcessInitQueue();
-            ProcessTransitionQueue();
+            ProcessTransitionAddQueue();
+            ProcessTransitionExecuteQueue();
             ProcessExitQueue();
             ProcessEnterQueue();
         }
@@ -155,15 +159,35 @@ namespace StateMachinePackage.Runtime
             while (initQueueCopy.Count > 0) initQueueCopy.Dequeue().Init();
         }
 
-        private void ProcessTransitionQueue()
+        private void ProcessTransitionAddQueue()
         {
-            var transitionQueueCopy = new Queue<TransitionData>(_transitionQueue);
-            _transitionQueue.Clear();
-            while (transitionQueueCopy.Count > 0)
+            var transitionAddQueueCopy = new Queue<TransitionData>(_transitionAddQueue);
+            _transitionAddQueue.Clear();
+            while (transitionAddQueueCopy.Count > 0)
             {
-                TransitionData transitionData = transitionQueueCopy.Dequeue();
+                var transitionData = transitionAddQueueCopy.Dequeue();
                 var state = GetStateByType(transitionData.from);
                 state.CreateTransitionInternal(transitionData.to, transitionData.condition);
+            }
+        }
+
+        private void ProcessTransitionExecuteQueue()
+        {
+            var transitionExecuteQueueCopy = TransitionExecuteQueue.ShallowCopy();
+            transitionExecuteQueueCopy.Clear();
+            while(transitionExecuteQueueCopy.Count > 0)
+            {
+                var transition = TransitionExecuteQueue.Dequeue();
+                var fromState = GetStateByType(transition.From);
+
+                if (!CurrentState.Equals(fromState))
+                {
+                    if (CurrentState.IsChildOf(fromState))
+                        SwitchState(transition.To);
+                    else
+                        return;
+                }
+                SwitchState(transition.To);
             }
         }
 

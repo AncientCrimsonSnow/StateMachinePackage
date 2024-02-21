@@ -6,38 +6,21 @@ namespace StateMachinePackage.Runtime.Transitions
     {
         public StateMachineManager _stateMachineManager;
 
-        private Type _from;
-        private Type _to;
+        internal readonly Type From;
+        internal readonly Type To;
 
-        private Condition _condition;
+        private readonly Condition _condition;
         
         internal Transition(StateMachineManager stateMachineManager, Type from, Type to, Condition condition)
         {
             _stateMachineManager = stateMachineManager;
-            _from = from;
-            _to = to;
+            From = from;
+            To = to;
             _condition = condition;
 
-            _condition.AddListener(() => Execute());
+            _condition.AddListener(() => _stateMachineManager.TransitionExecuteQueue.Enqueue(this));
         }
 
-        private void Execute()
-        {
-            var fromState = _stateMachineManager.GetStateByType(_from);
-            
-            if (!_stateMachineManager.CurrentState.Equals(fromState))
-            {
-                if(_stateMachineManager.CurrentState.IsChildOf(fromState))
-                    _stateMachineManager.SwitchState(_to);
-                else
-                    return;
-            }
-            _stateMachineManager.SwitchState(_to);
-        }
-
-        public void Dispose()
-        {
-            _condition.RemoveAllListeners();
-        }
+        public void Dispose() => _condition.RemoveAllListeners();
     }
 }

@@ -122,7 +122,6 @@ namespace StateMachinePackage.Runtime
             foreach (var pathState in pathState1ToLCA)
                 _exitQueue.Enqueue(pathState);
 
-            CurrentState = state;
             foreach (var pathState in pathLCAtoState2)
                 _enterQueue.Enqueue(pathState);
 
@@ -179,7 +178,15 @@ namespace StateMachinePackage.Runtime
         {
             var enterQueueCopy = _enterQueue.ShallowCopy();
             _enterQueue.Clear();
-            while (enterQueueCopy.Count > 0) enterQueueCopy.Dequeue().Enter();
+
+            State newCurrentState = null;
+            while (enterQueueCopy.Count > 0)
+            {
+                newCurrentState = enterQueueCopy.Dequeue();
+                newCurrentState.Enter();
+            }
+            if(newCurrentState != null)
+                CurrentState = newCurrentState;
         }
 
         private int GetDepth(State state)

@@ -4,15 +4,15 @@ namespace StateMachinePackage.Runtime
 {
     public class UniqueQueue<T>
     {
-        private Queue<T> queue = new Queue<T>();
-        private HashSet<T> set = new HashSet<T>();
+        private readonly Queue<T> queue = new();
+        private readonly HashSet<T> set = new();
+
+        public int Count => queue.Count;
 
         public void Enqueue(T item)
         {
             if (set.Add(item))
-            {
                 queue.Enqueue(item);
-            }
         }
 
         public T Dequeue()
@@ -22,9 +22,19 @@ namespace StateMachinePackage.Runtime
             return item;
         }
 
-        public int Count
+        public UniqueQueue<T> ShallowCopy()
         {
-            get { return queue.Count; }
+            UniqueQueue<T> clone = new();
+            foreach (T item in queue)
+                clone.Enqueue(item);
+
+            return clone;
+        }
+
+        public void Clear()
+        {
+            queue.Clear();
+            set.Clear();
         }
     }
 }

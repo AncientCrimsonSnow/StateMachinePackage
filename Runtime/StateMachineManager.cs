@@ -151,18 +151,18 @@ namespace StateMachinePackage.Runtime
 
         private void ProcessInitQueue()
         {
-            while (_initQueue.Count > 0)
-            {
-                State state = _initQueue.Dequeue();
-                state.Init();
-            }
+            var initQueueCopy = _initQueue.ShallowCopy();
+            _initQueue.Clear();
+            while (initQueueCopy.Count > 0) initQueueCopy.Dequeue().Init();
         }
 
         private void ProcessTransitionQueue()
         {
-            while (_transitionQueue.Count > 0)
+            var transitionQueueCopy = new Queue<TransitionData>(_transitionQueue);
+            _transitionQueue.Clear();
+            while (transitionQueueCopy.Count > 0)
             {
-                TransitionData transitionData = _transitionQueue.Dequeue();
+                TransitionData transitionData = transitionQueueCopy.Dequeue();
                 var state = GetStateByType(transitionData.from);
                 state.CreateTransitionInternal(transitionData.to, transitionData.condition);
             }
@@ -170,20 +170,16 @@ namespace StateMachinePackage.Runtime
 
         private void ProcessExitQueue()
         {
-            while (_exitQueue.Count > 0)
-            {
-                State state = _exitQueue.Dequeue();
-                state.Exit();
-            }
+            var exitQueueCopy = _exitQueue.ShallowCopy();
+            _exitQueue.Clear();
+            while (exitQueueCopy.Count > 0) exitQueueCopy.Dequeue().Exit();
         }
 
         private void ProcessEnterQueue()
         {
-            while (_enterQueue.Count > 0)
-            {
-                State state = _enterQueue.Dequeue();
-                state.Enter();
-            }
+            var enterQueueCopy = _enterQueue.ShallowCopy();
+            _enterQueue.Clear();
+            while (enterQueueCopy.Count > 0) enterQueueCopy.Dequeue().Enter();
         }
 
         private int GetDepth(State state)
@@ -199,8 +195,8 @@ namespace StateMachinePackage.Runtime
 
         private (List<State> pathState1ToLCA, List<State> pathLCAtoState2) FindPathsToLCA(State state1, State state2)
         {
-            List<State> path1 = new List<State>();
-            List<State> path2 = new List<State>();
+            List<State> path1 = new();
+            List<State> path2 = new();
             _ = FindLowestCommonAncestor(state1, state2, path1, path2);
 
             path2.Reverse();

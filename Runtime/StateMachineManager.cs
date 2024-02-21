@@ -146,17 +146,17 @@ namespace StateMachinePackage.Runtime
         private void ProcessQueues()
         {
             ProcessInitQueue();
+
             ProcessTransitionAddQueue();
             ProcessTransitionExecuteQueue();
+
             ProcessExitQueue();
             ProcessEnterQueue();
         }
 
         private void ProcessInitQueue()
         {
-            var initQueueCopy = _initQueue.ShallowCopy();
-            _initQueue.Clear();
-            while (initQueueCopy.Count > 0) initQueueCopy.Dequeue().Init();
+            while (_initQueue.Count > 0) _initQueue.Dequeue().Init();
         }
 
         private void ProcessTransitionAddQueue()
@@ -174,10 +174,10 @@ namespace StateMachinePackage.Runtime
         private void ProcessTransitionExecuteQueue()
         {
             var transitionExecuteQueueCopy = TransitionExecuteQueue.ShallowCopy();
-            transitionExecuteQueueCopy.Clear();
+            TransitionExecuteQueue.Clear();
             while(transitionExecuteQueueCopy.Count > 0)
             {
-                var transition = TransitionExecuteQueue.Dequeue();
+                var transition = transitionExecuteQueueCopy.Dequeue();
                 var fromState = GetStateByType(transition.From);
 
                 if (!CurrentState.Equals(fromState))
@@ -185,7 +185,7 @@ namespace StateMachinePackage.Runtime
                     if (CurrentState.IsChildOf(fromState))
                         SwitchState(transition.To);
                     else
-                        return;
+                        continue;
                 }
                 SwitchState(transition.To);
             }

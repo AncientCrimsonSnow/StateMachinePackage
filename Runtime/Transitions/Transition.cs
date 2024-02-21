@@ -18,7 +18,12 @@ namespace StateMachinePackage.Runtime.Transitions
             To = to;
             _condition = condition;
 
-            _condition.AddListener(() => _stateMachineManager.TransitionExecuteQueue.Enqueue(this));
+            _condition.AddListener(Execute);
+        }
+
+        private void Execute()
+        {
+            _stateMachineManager.TransitionExecuteQueue.Enqueue(this);
         }
 
         public void Dispose() => _condition.RemoveAllListeners();

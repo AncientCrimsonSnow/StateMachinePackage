@@ -1,4 +1,6 @@
 ﻿using StateMachinePackage.Runtime.Transitions;
+using StateMachinePackage.Runtime.Transitions.Conditions;
+using StateMachinePackage.Runtime.Transitions.Wrapper;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -65,13 +67,15 @@ namespace StateMachinePackage.Runtime
 
         public virtual void Init()
         {
-            Debug.Log($"INIT {this}");
+            if(StateMachineManager.ConfigData.PrintDebug)
+                Debug.Log($"INIT {this}");
             _onInit.Invoke();
         }
 
         public virtual void Enter()
         {
-            Debug.Log($"ENTER {this}");
+            if (StateMachineManager.ConfigData.PrintDebug)
+                Debug.Log($"ENTER {this}");
             _onEnter.Invoke();
         }
         public virtual void Update()
@@ -81,7 +85,8 @@ namespace StateMachinePackage.Runtime
 
         public virtual void Exit()
         {
-            Debug.Log($"EXIT {this}");
+            if (StateMachineManager.ConfigData.PrintDebug)
+                Debug.Log($"EXIT {this}");
             _onExit.Invoke();
         }
 
@@ -124,6 +129,12 @@ namespace StateMachinePackage.Runtime
 
         protected new abstract Type GetType();
         #endregion
+
+        protected void CreateTransition(Type to, BooleanWrapper booleanWrapper) => CreateTransition(to, new BooleanCondition(booleanWrapper));
+        protected void CreateTransition(Type to, ref Action eventTriggerMethod) => CreateTransition(to, new EventCondition(ref eventTriggerMethod));
+        protected void CreateTransition(Type to, UnityEvent unityEvent) => CreateTransition(to, new EventCondition(unityEvent));
+        protected void CreateTransition(Type to, FloatWrapper value, float targetValue, ComparisonType comparisonType) => CreateTransition(to, new FloatCondition(value, targetValue, comparisonType));
+        protected void CreateTransition(Type to, IntWrapper value, int targetValue, ComparisonType comparisionType) => CreateTransition(to, new IntCondition(value, targetValue, comparisionType));
 
         protected void CreateTransition(Type to, Condition condition)
         {

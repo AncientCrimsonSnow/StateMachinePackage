@@ -1,8 +1,12 @@
-﻿using StateMachinePackage.Runtime.Transitions;
+﻿using Assets.StateMachinePackage.Runtime;
+using StateMachinePackage.Runtime.Transitions;
+using StateMachinePackage.Runtime.Transitions.Conditions;
+using StateMachinePackage.Runtime.Transitions.Wrapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace StateMachinePackage.Runtime
 {
@@ -11,6 +15,7 @@ namespace StateMachinePackage.Runtime
         public State CurrentState { private set; get; }
 
         internal readonly UniqueQueue<Transition> TransitionExecuteQueue = new();
+        internal readonly StateMachineConfigData ConfigData;
 
         private readonly Dictionary<Type, State> _allStates = new();
 
@@ -21,6 +26,11 @@ namespace StateMachinePackage.Runtime
         private readonly UniqueQueue<State> _enterQueue = new();
      
         private readonly Queue<TransitionData> _transitionAddQueue = new();
+
+        internal StateMachineManager(StateMachineConfigData configData)
+        {
+            ConfigData = configData;
+        }
 
         public void Update()
         {
@@ -96,6 +106,16 @@ namespace StateMachinePackage.Runtime
             return newStates;
         }
 
+        public void AddTransition(Type from, Type to, BooleanWrapper booleanWrapper) => AddTransition(from, to, new BooleanCondition(booleanWrapper));
+
+        public void AddTransition(Type from, Type to, ref Action eventTriggerMethod) => AddTransition(from, to, new EventCondition(ref eventTriggerMethod));
+
+        public void AddTransition(Type from, Type to, UnityEvent unityEvent) => AddTransition(from, to, new EventCondition(unityEvent));
+
+        public void AddTransition(Type from, Type to, FloatWrapper value, float targetValue, ComparisonType comparisonType) => AddTransition(from, to, new FloatCondition(value, targetValue, comparisonType));
+
+        public void AddTransition(Type from, Type to, IntWrapper value, int targetValue, ComparisonType comparisonType) => AddTransition(from, to, new IntCondition(value, targetValue, comparisonType));
+
         public void AddTransition(Type from, Type to, Condition condition)
         {
             _transitionAddQueue.Enqueue(
@@ -106,6 +126,8 @@ namespace StateMachinePackage.Runtime
                     condition = condition
                 });
         }
+
+
 
         internal void SwitchState(Type stateType) => SwitchState(GetStateByType(stateType));
         internal void SwitchState(State state)

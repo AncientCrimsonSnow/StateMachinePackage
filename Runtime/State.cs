@@ -6,6 +6,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
+
 namespace StateMachinePackage.Runtime
 {
     public abstract class State
@@ -130,6 +134,9 @@ namespace StateMachinePackage.Runtime
         protected new abstract Type GetType();
         #endregion
 
+#if ENABLE_INPUT_SYSTEM
+        protected void CreateTransition(Type to, InputAction inputAction) => CreateTransition(to, new EventCondition(inputAction));
+#endif
         protected void CreateTransition(Type to, BooleanWrapper booleanWrapper) => CreateTransition(to, new BooleanCondition(booleanWrapper));
         protected void CreateTransition(Type to, ref Action eventTriggerMethod) => CreateTransition(to, new EventCondition(ref eventTriggerMethod));
         protected void CreateTransition(Type to, UnityEvent unityEvent) => CreateTransition(to, new EventCondition(unityEvent));

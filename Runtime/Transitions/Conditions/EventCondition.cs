@@ -2,6 +2,10 @@
 using System;
 using UnityEngine.Events;
 
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
+
 namespace StateMachinePackage.Runtime.Transitions.Conditions
 {
     public class EventCondition : Condition
@@ -15,6 +19,13 @@ namespace StateMachinePackage.Runtime.Transitions.Conditions
         {
             unityEvent.AddListener(TriggerConditionMeetWrapper);
         }
+
+#if ENABLE_INPUT_SYSTEM
+        public EventCondition(InputAction inputAction)
+        {
+            inputAction.performed += ctx => TriggerConditionMeetWrapper();
+        }
+#endif
 
         private void TriggerConditionMeetWrapper()
         {

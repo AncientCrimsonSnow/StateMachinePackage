@@ -2,7 +2,8 @@
     "name": "StateMachine.Runtime",
     "rootNamespace": "",
     "references": [
-        "StateMachine.Core"
+        "StateMachine.Core",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
